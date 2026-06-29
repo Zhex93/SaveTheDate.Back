@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SaveTheDate.Api/SaveTheDate.Api.csproj" />
+    <Project Path="src/SaveTheDate.Application/SaveTheDate.Application.csproj" />
+    <Project Path="src/SaveTheDate.Domain/SaveTheDate.Domain.csproj" />
+    <Project Path="src/SaveTheDate.Infrastructure/SaveTheDate.Infrastructure.csproj" />
+  </Folder>
+</Solution>

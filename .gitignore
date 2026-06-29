@@ -1,0 +1,70 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+*.nupkg
+*.snupkg
+*.DotSettings.user
+
+## Visual Studio
+.vs/
+*.dbmdl
+*.jfm
+*.ops
+*.publishsettings
+
+## Rider
+.idea/
+*.csproj.reference
+
+## dotnet EF
+*.efcore-cache
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Linux
+*~
+.directory
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## NuGet
+packages/
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+## Unit test / coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coveragereport/
+
+## ASP.NET / appsettings
+appsettings.*.local.json
+secrets.json
+
+## Logs
+*.log
+logs/

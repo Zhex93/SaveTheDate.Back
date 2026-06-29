@@ -1,0 +1,24 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SaveTheDate.Domain.Roles;
+
+namespace SaveTheDate.Infrastructure.Persistence.Configurations;
+
+public class RoleConfiguration : IEntityTypeConfiguration<Role>
+{
+    public void Configure(EntityTypeBuilder<Role> builder)
+    {
+        builder.ToTable("roles");
+
+        builder.HasKey(r => r.Id);
+
+        builder.Property(r => r.Id)
+            .HasColumnName("id")
+            .ValueGeneratedOnAdd();
+
+        builder.Property(r => r.Description)
+            .HasColumnName("description")
+            .IsRequired()
+            .HasMaxLength(256);
+    }
+}
