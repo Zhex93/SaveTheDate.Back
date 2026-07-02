@@ -1,11 +1,10 @@
 using System.Text;
-using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using SaveTheDate.Api.Filters;
 using SaveTheDate.Application;
-using SaveTheDate.Application.Common.Mappings;
+using SaveTheDate.Application.Abstractions;
 using SaveTheDate.Infrastructure;
 using SaveTheDate.Infrastructure.Authentication;
 
@@ -83,9 +82,7 @@ app.Run();
 static async Task SeedAdminUser(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
-    var userRepo = scope.ServiceProvider.GetRequiredService<SaveTheDate.Domain.Abstractions.IUserRepository>();
-    var passwordHasher = scope.ServiceProvider.GetRequiredService<SaveTheDate.Domain.Abstractions.IPasswordHasher>();
-    var unitOfWork = scope.ServiceProvider.GetRequiredService<SaveTheDate.Domain.Abstractions.IUnitOfWork>();
+    var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
 
     var config = app.Configuration.GetSection("Seed:Admin");
     if (!config.Exists()) return;
@@ -96,13 +93,23 @@ static async Task SeedAdminUser(WebApplication app)
 
     if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password)) return;
 
-    var existing = await userRepo.GetByEmailAsync(email);
-    if (existing is not null) return;
+    if (!await authService.RoleExistsAsync(role))
+    {
+        await authService.CreateRoleAsync(role);
+    }
 
-    var user = new SaveTheDate.Domain.Users.User(email, passwordHasher.Hash(password), role);
-    await userRepo.AddAsync(user);
-    await unitOfWork.SaveChangesAsync();
+    var (userId, _, _) = await authService.FindByEmailAsync(email);
+    if (!string.IsNullOrEmpty(userId)) return;
+
+    var (succeeded, error) = await authService.CreateUserAsync(email, password, role);
 
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("Seeded admin user: {Email} / {Password}", email, password);
+    if (succeeded)
+    {
+        logger.LogInformation("Seeded admin user: {Email}", email);
+    }
+    else
+    {
+        logger.LogWarning("Failed to seed admin user: {Error}", error);
+    }
 }

@@ -1,37 +1,35 @@
 using MediatR;
 using SaveTheDate.Application.Authentication.DTOs;
 using SaveTheDate.Application.Abstractions;
-using SaveTheDate.Domain.Abstractions;
 using SaveTheDate.Domain.Common;
 
 namespace SaveTheDate.Application.Authentication.Commands.Login;
 
 public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IPasswordHasher _passwordHasher;
+    private readonly IAuthService _authService;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
     public LoginCommandHandler(
-        IUserRepository userRepository,
-        IPasswordHasher passwordHasher,
+        IAuthService authService,
         IJwtTokenGenerator jwtTokenGenerator)
     {
-        _userRepository = userRepository;
-        _passwordHasher = passwordHasher;
+        _authService = authService;
         _jwtTokenGenerator = jwtTokenGenerator;
     }
 
     public async Task<AuthResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (user is null)
+        var (succeeded, error) = await _authService.CheckPasswordAsync(request.Email, request.Password);
+        if (!succeeded)
+            throw new ValidationException(error!);
+
+        var (userId, email, roles) = await _authService.FindByEmailAsync(request.Email);
+        if (string.IsNullOrEmpty(userId))
             throw new ValidationException("Invalid email or password.");
 
-        if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
-            throw new ValidationException("Invalid email or password.");
-
-        var token = _jwtTokenGenerator.GenerateToken(user.Id, user.Email, user.Role);
-        return new AuthResponseDto(user.Id, user.Email, user.Role, token, DateTime.UtcNow.AddHours(1));
+        var token = _jwtTokenGenerator.GenerateToken(userId, email, roles);
+        var role = roles.FirstOrDefault() ?? string.Empty;
+        return new AuthResponseDto(userId, email, role, token, DateTime.UtcNow.AddHours(1));
     }
 }

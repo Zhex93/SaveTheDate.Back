@@ -2,5 +2,5 @@ namespace SaveTheDate.Application.Abstractions;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(int userId, string email, string role);
+    string GenerateToken(string userId, string email, IList<string> roles);
 }

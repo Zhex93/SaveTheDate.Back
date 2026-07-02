@@ -68,3 +68,4 @@ secrets.json
 ## Logs
 *.log
 logs/
+.mcp-insomnia-local/
