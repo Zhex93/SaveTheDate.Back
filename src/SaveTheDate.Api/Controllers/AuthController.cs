@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SaveTheDate.Api.Contracts.Auth;
 using SaveTheDate.Application.Authentication.Commands.Login;
 using SaveTheDate.Application.Authentication.Commands.Register;
+using SaveTheDate.Application.Authentication.DTOs;
 
 namespace SaveTheDate.Api.Controllers;
 
@@ -17,6 +18,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var result = await _mediator.Send(new LoginCommand(request.Email, request.Password));
@@ -25,6 +27,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("register")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var result = await _mediator.Send(new RegisterCommand(request.Email, request.Password, request.Role));

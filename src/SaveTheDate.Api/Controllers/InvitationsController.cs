@@ -6,6 +6,7 @@ using SaveTheDate.Application.Invitations.Commands.ChangeState;
 using SaveTheDate.Application.Invitations.Commands.CreateInvitation;
 using SaveTheDate.Application.Invitations.Commands.DeleteInvitation;
 using SaveTheDate.Application.Invitations.Commands.UpdateInvitation;
+using SaveTheDate.Application.Invitations.DTOs;
 using SaveTheDate.Application.Invitations.Queries.GetInvitationById;
 using SaveTheDate.Application.Invitations.Queries.GetInvitations;
 using SaveTheDate.Domain.Invitations;
@@ -22,6 +23,7 @@ public class InvitationsController : ControllerBase
     public InvitationsController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<InvitationDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
         var result = await _mediator.Send(new GetInvitationsQuery());
@@ -29,6 +31,7 @@ public class InvitationsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(InvitationDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _mediator.Send(new GetInvitationByIdQuery(id));
@@ -36,6 +39,7 @@ public class InvitationsController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(InvitationDto), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateInvitationRequest request)
     {
         var result = await _mediator.Send(new CreateInvitationCommand(
@@ -44,6 +48,7 @@ public class InvitationsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(InvitationDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateInvitationRequest request)
     {
         var result = await _mediator.Send(new UpdateInvitationCommand(
@@ -52,6 +57,8 @@ public class InvitationsController : ControllerBase
     }
 
     [HttpPatch("{id:int}/state")]
+    [ProducesResponseType(typeof(InvitationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangeState(int id, [FromBody] ChangeInvitationStateRequest request)
     {
         if (!Enum.TryParse<InvitationState>(request.State, true, out var state))
@@ -62,6 +69,7 @@ public class InvitationsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(int id)
     {
         await _mediator.Send(new DeleteInvitationCommand(id));

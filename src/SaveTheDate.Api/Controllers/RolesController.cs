@@ -5,6 +5,7 @@ using SaveTheDate.Api.Contracts.Roles;
 using SaveTheDate.Application.Roles.Commands.CreateRole;
 using SaveTheDate.Application.Roles.Commands.DeleteRole;
 using SaveTheDate.Application.Roles.Commands.UpdateRole;
+using SaveTheDate.Application.Roles.DTOs;
 using SaveTheDate.Application.Roles.Queries.GetRoleById;
 using SaveTheDate.Application.Roles.Queries.GetRoles;
 
@@ -20,6 +21,7 @@ public class RolesController : ControllerBase
     public RolesController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<RoleDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
         var result = await _mediator.Send(new GetRolesQuery());
@@ -27,6 +29,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(RoleDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _mediator.Send(new GetRoleByIdQuery(id));
@@ -34,6 +37,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(RoleDto), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateRoleRequest request)
     {
         var result = await _mediator.Send(new CreateRoleCommand(request.Description));
@@ -41,6 +45,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(RoleDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateRoleRequest request)
     {
         var result = await _mediator.Send(new UpdateRoleCommand(id, request.Description));
@@ -48,6 +53,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(int id)
     {
         await _mediator.Send(new DeleteRoleCommand(id));

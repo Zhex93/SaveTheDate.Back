@@ -5,6 +5,7 @@ using SaveTheDate.Api.Contracts.Guests;
 using SaveTheDate.Application.Guests.Commands.CreateGuest;
 using SaveTheDate.Application.Guests.Commands.DeleteGuest;
 using SaveTheDate.Application.Guests.Commands.UpdateGuest;
+using SaveTheDate.Application.Guests.DTOs;
 using SaveTheDate.Application.Guests.Queries.GetGuestById;
 using SaveTheDate.Application.Guests.Queries.GetGuests;
 
@@ -20,6 +21,7 @@ public class GuestsController : ControllerBase
     public GuestsController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<GuestDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
         var result = await _mediator.Send(new GetGuestsQuery());
@@ -27,6 +29,7 @@ public class GuestsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(GuestDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _mediator.Send(new GetGuestByIdQuery(id));
@@ -34,6 +37,7 @@ public class GuestsController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(GuestDto), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateGuestRequest request)
     {
         var result = await _mediator.Send(new CreateGuestCommand(
@@ -42,6 +46,7 @@ public class GuestsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(GuestDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateGuestRequest request)
     {
         var result = await _mediator.Send(new UpdateGuestCommand(
@@ -50,6 +55,7 @@ public class GuestsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(int id)
     {
         await _mediator.Send(new DeleteGuestCommand(id));
