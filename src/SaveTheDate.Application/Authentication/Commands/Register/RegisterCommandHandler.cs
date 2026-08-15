@@ -25,8 +25,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             throw new ValidationException(error!);
 
         var (userId, email, roles) = await _authService.FindByEmailAsync(request.Email);
-        var token = _jwtTokenGenerator.GenerateToken(userId, email, roles);
+        var accessToken = _jwtTokenGenerator.GenerateAccessToken(userId, email, roles);
         var role = roles.FirstOrDefault() ?? string.Empty;
-        return new AuthResponseDto(userId, email, role, token, DateTime.UtcNow.AddHours(1));
+        return new AuthResponseDto(userId, email, role, accessToken.Token, accessToken.ExpiresAt);
     }
 }

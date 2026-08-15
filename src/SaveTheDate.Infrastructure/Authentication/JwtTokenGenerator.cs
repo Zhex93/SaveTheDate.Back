@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +17,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _settings = settings.Value;
     }
 
-    public string GenerateToken(string userId, string email, IList<string> roles)
+    public GeneratedToken GenerateAccessToken(string userId, string email, IList<string> roles)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -34,14 +35,24 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             claims.Add(new Claim("role", role));
         }
 
+        var expiresAt = DateTime.UtcNow.AddMinutes(_settings.AccessTokenExpirationMinutes);
+
         var token = new JwtSecurityToken(
             issuer: _settings.Issuer,
             audience: _settings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: expiresAt,
             signingCredentials: credentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new GeneratedToken(new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
+    }
+
+    public GeneratedToken GenerateRefreshToken()
+    {
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        var token = Convert.ToBase64String(randomBytes);
+        var expiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpirationDays);
+        return new GeneratedToken(token, expiresAt);
     }
 }
 
@@ -51,4 +62,6 @@ public class JwtSettings
     public string Secret { get; set; } = string.Empty;
     public string Issuer { get; set; } = string.Empty;
     public string Audience { get; set; } = string.Empty;
+    public int AccessTokenExpirationMinutes { get; set; } = 60;
+    public int RefreshTokenExpirationDays { get; set; } = 7;
 }

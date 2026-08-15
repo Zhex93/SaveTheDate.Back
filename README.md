@@ -91,7 +91,7 @@ POST /api/auth/login
 }
 ```
 
-Returns a JWT token. Use `Bearer {token}` in the Authorization header for all other endpoints.
+Returns a JWT access token and a refresh token (in the body and as HttpOnly cookies). Use the access token as `Bearer {token}` in the Authorization header for all other endpoints, and `POST /api/auth/refresh` to renew it.
 
 ## API Endpoints
 
@@ -99,8 +99,9 @@ Returns a JWT token. Use `Bearer {token}` in the Authorization header for all ot
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/api/auth/login` | No | Login, returns JWT |
+| POST | `/api/auth/login` | No | Login, returns access + refresh token |
 | POST | `/api/auth/register` | Admin | Create new user |
+| POST | `/api/auth/refresh` | No | Exchange a refresh token for a new access token |
 
 ### Roles
 
@@ -139,8 +140,9 @@ Returns a JWT token. Use `Bearer {token}` in the Authorization header for all ot
 
 ## Security
 
-- JWT symmetric HS256, 60-minute expiration.
-- `[Authorize]` on all write endpoints; `[AllowAnonymous]` on login.
+- JWT symmetric HS256, with configurable lifetimes (`Jwt:AccessTokenExpirationMinutes`, default 60 minutes).
+- Refresh tokens are random 512-bit values with configurable lifetime (`Jwt:RefreshTokenExpirationDays`, default 7 days), persisted in the `AspNetUserTokens` table and rotated on every refresh (the old token is invalidated). One active refresh token per user.
+- `[Authorize]` on all write endpoints; `[AllowAnonymous]` on login and refresh.
 - Passwords hashed with BCrypt.
 - **Important**: Change `Jwt:Secret` to a strong key in production.
 

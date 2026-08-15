@@ -8,9 +8,9 @@ namespace SaveTheDate.Application.Authentication.Commands.Login;
 public class LoginCommandHandler(
     IAuthService authService,
     IJwtTokenGenerator jwtTokenGenerator)
-    : IRequestHandler<LoginCommand, LoginResult>
+    : IRequestHandler<LoginCommand, LoginResponseDto>
 {
-    public async Task<LoginResult> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<LoginResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var (succeeded, error) = await authService.CheckPasswordAsync(request.Email, request.Password);
         if (!succeeded)
@@ -20,10 +20,19 @@ public class LoginCommandHandler(
         if (string.IsNullOrEmpty(userId))
             throw new ValidationException("Invalid email or password.");
 
-        var token = jwtTokenGenerator.GenerateToken(userId, email, roles);
+        var accessToken = jwtTokenGenerator.GenerateAccessToken(userId, email, roles);
+        var refreshToken = jwtTokenGenerator.GenerateRefreshToken();
+
+        await authService.SaveRefreshTokenAsync(userId, refreshToken.Token, refreshToken.ExpiresAt);
+
         var role = roles.FirstOrDefault() ?? string.Empty;
-        var expiresAt = DateTime.UtcNow.AddHours(1);
-        var response = new LoginResponseDto(userId, email, role, expiresAt);
-        return new LoginResult(token, response);
+        return new LoginResponseDto(
+            userId,
+            email,
+            role,
+            accessToken.Token,
+            accessToken.ExpiresAt,
+            refreshToken.Token,
+            refreshToken.ExpiresAt);
     }
 }

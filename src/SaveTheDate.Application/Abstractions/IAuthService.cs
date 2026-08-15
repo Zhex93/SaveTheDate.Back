@@ -7,4 +7,6 @@ public interface IAuthService
     Task<(bool Succeeded, string? Error)> CreateUserAsync(string email, string password, string role);
     Task<bool> RoleExistsAsync(string role);
     Task<(bool Succeeded, string? Error)> CreateRoleAsync(string role);
+    Task SaveRefreshTokenAsync(string userId, string refreshToken, DateTime expiresAt);
+    Task<(bool Succeeded, string? UserId, string? Email, IList<string> Roles)> ValidateRefreshTokenAsync(string refreshToken);
 }
