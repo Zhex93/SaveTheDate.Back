@@ -10,19 +10,28 @@ namespace SaveTheDate.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(IMediator mediator, IWebHostEnvironment environment) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public AuthController(IMediator mediator) => _mediator = mediator;
+    private const string AuthTokenCookieName = "authToken";
 
     [HttpPost("login")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var result = await _mediator.Send(new LoginCommand(request.Email, request.Password));
-        return Ok(result);
+        var (token, response) = await mediator.Send(new LoginCommand(request.Email, request.Password));
+
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !environment.IsDevelopment(),
+            SameSite = environment.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
+            Expires = response.ExpiresAt
+        };
+
+        Response.Cookies.Append(AuthTokenCookieName, token, cookieOptions);
+        
+        return Ok(response);
     }
 
     [HttpPost("register")]
@@ -30,7 +39,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var result = await _mediator.Send(new RegisterCommand(request.Email, request.Password, request.Role));
+        var result = await mediator.Send(new RegisterCommand(request.Email, request.Password, request.Role));
         return Ok(result);
     }
 }
