@@ -220,17 +220,6 @@ namespace SaveTheDate.Infrastructure.Migrations
 
             modelBuilder.Entity("SaveTheDate.Domain.Guests.Guest", b =>
                 {
-                    b.Property<string>("Phone")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("phone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("email");
-
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -238,11 +227,22 @@ namespace SaveTheDate.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("email");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("name");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("phone");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("integer")
@@ -254,14 +254,14 @@ namespace SaveTheDate.Infrastructure.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("surname");
 
-                    b.HasKey("Phone");
+                    b.HasKey("Id");
 
                     b.HasIndex("Email");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
                     b.HasIndex("Name");
+
+                    b.HasIndex("Phone")
+                        .IsUnique();
 
                     b.ToTable("guests", (string)null);
                 });
@@ -274,6 +274,15 @@ namespace SaveTheDate.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("AccessTokenCreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("access_token_created_at");
+
+                    b.Property<string>("AccessTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("access_token_hash");
 
                     b.Property<int>("GuestId")
                         .HasColumnType("integer")
@@ -292,6 +301,9 @@ namespace SaveTheDate.Infrastructure.Migrations
                         .HasColumnName("state");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AccessTokenHash")
+                        .IsUnique();
 
                     b.HasIndex("GuestId");
 
@@ -371,12 +383,13 @@ namespace SaveTheDate.Infrastructure.Migrations
 
             modelBuilder.Entity("SaveTheDate.Domain.Invitations.Invitation", b =>
                 {
-                    b.HasOne("SaveTheDate.Domain.Guests.Guest", null)
+                    b.HasOne("SaveTheDate.Domain.Guests.Guest", "Guest")
                         .WithMany()
                         .HasForeignKey("GuestId")
-                        .HasPrincipalKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Guest");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,7 +8,7 @@ public class CreateGuestCommandValidator : AbstractValidator<CreateGuestCommand>
     {
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.Surname).NotEmpty();
-        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.Email).EmailAddress();
         RuleFor(x => x.Phone).NotEmpty();
         RuleFor(x => x.RoleId).GreaterThan(0);
     }

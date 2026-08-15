@@ -9,6 +9,8 @@ public class NotFoundException : DomainException
 {
     public NotFoundException(string entityName, int id)
         : base($"{entityName} with Id {id} was not found.") { }
+
+    public NotFoundException(string message) : base(message) { }
 }
 
 public class InvalidOperationDomainException : DomainException

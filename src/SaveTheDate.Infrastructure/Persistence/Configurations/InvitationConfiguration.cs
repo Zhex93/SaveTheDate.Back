@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SaveTheDate.Domain.Guests;
 using SaveTheDate.Domain.Invitations;
 
 namespace SaveTheDate.Infrastructure.Persistence.Configurations;
@@ -28,7 +29,16 @@ public class InvitationConfiguration : IEntityTypeConfiguration<Invitation>
             .HasColumnName("observations")
             .HasMaxLength(1024);
 
-        builder.HasOne<Domain.Guests.Guest>()
+        builder.Property(i => i.AccessTokenHash)
+            .HasColumnName("access_token_hash")
+            .HasMaxLength(64);
+
+        builder.Property(i => i.AccessTokenCreatedAt)
+            .HasColumnName("access_token_created_at");
+
+        builder.HasIndex(i => i.AccessTokenHash).IsUnique();
+
+        builder.HasOne(i => i.Guest)
             .WithMany()
             .HasForeignKey(i => i.GuestId)
             .HasPrincipalKey(g => g.Id);

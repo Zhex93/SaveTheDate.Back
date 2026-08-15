@@ -6,13 +6,13 @@ public class Guest : BaseEntity
 {
     public string Name { get; private set; } = string.Empty;
     public string Surname { get; private set; } = string.Empty;
-    public string Email { get; private set; } = string.Empty;
+    public string? Email { get; private set; }
     public string Phone { get; private set; } = string.Empty;
     public int RoleId { get; private set; }
 
     private Guest() { }
 
-    public Guest(string name, string surname, string email, string phone, int roleId)
+    public Guest(string name, string surname, string? email, string phone, int roleId)
     {
         SetName(name);
         SetSurname(surname);
@@ -35,11 +35,9 @@ public class Guest : BaseEntity
         Surname = surname;
     }
 
-    public void SetEmail(string email)
+    public void SetEmail(string? email)
     {
-        if (string.IsNullOrWhiteSpace(email))
-            throw new ValidationException("Guest email cannot be empty.");
-        Email = email;
+        Email = string.IsNullOrWhiteSpace(email) ? null : email;
     }
 
     public void SetPhone(string phone)
@@ -54,12 +52,20 @@ public class Guest : BaseEntity
         RoleId = roleId;
     }
 
-    public void Update(string name, string surname, string email, string phone, int roleId)
+    public void Update(string name, string surname, string? email, string phone, int roleId)
     {
         SetName(name);
         SetSurname(surname);
         SetEmail(email);
         SetPhone(phone);
         RoleId = roleId;
+    }
+
+    public void UpdateProfile(string name, string surname, string? email, string phone)
+    {
+        SetName(name);
+        SetSurname(surname);
+        SetEmail(email);
+        SetPhone(phone);
     }
 }

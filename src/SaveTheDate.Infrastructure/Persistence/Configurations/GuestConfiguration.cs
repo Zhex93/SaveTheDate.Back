@@ -10,13 +10,11 @@ public class GuestConfiguration : IEntityTypeConfiguration<Guest>
     {
         builder.ToTable("guests");
 
-        builder.HasKey(g => g.Phone);
+        builder.HasKey(g => g.Id);
 
         builder.Property(g => g.Id)
             .HasColumnName("id")
             .ValueGeneratedOnAdd();
-
-        builder.HasIndex(g => g.Id).IsUnique();
 
         builder.Property(g => g.Name)
             .HasColumnName("name")
@@ -30,7 +28,6 @@ public class GuestConfiguration : IEntityTypeConfiguration<Guest>
 
         builder.Property(g => g.Email)
             .HasColumnName("email")
-            .IsRequired()
             .HasMaxLength(256);
 
         builder.Property(g => g.Phone)
@@ -41,6 +38,7 @@ public class GuestConfiguration : IEntityTypeConfiguration<Guest>
         builder.Property(g => g.RoleId)
             .HasColumnName("role_id");
 
+        builder.HasIndex(g => g.Phone).IsUnique();
         builder.HasIndex(g => g.Name);
         builder.HasIndex(g => g.Email);
     }

@@ -5,6 +5,7 @@ using SaveTheDate.Api.Contracts.Invitations;
 using SaveTheDate.Application.Invitations.Commands.ChangeState;
 using SaveTheDate.Application.Invitations.Commands.CreateInvitation;
 using SaveTheDate.Application.Invitations.Commands.DeleteInvitation;
+using SaveTheDate.Application.Invitations.Commands.GenerateAccessLink;
 using SaveTheDate.Application.Invitations.Commands.UpdateInvitation;
 using SaveTheDate.Application.Invitations.DTOs;
 using SaveTheDate.Application.Invitations.Queries.GetInvitationById;
@@ -19,8 +20,13 @@ namespace SaveTheDate.Api.Controllers;
 public class InvitationsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IConfiguration _configuration;
 
-    public InvitationsController(IMediator mediator) => _mediator = mediator;
+    public InvitationsController(IMediator mediator, IConfiguration configuration)
+    {
+        _mediator = mediator;
+        _configuration = configuration;
+    }
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<InvitationDto>), StatusCodes.Status200OK)]
@@ -74,5 +80,15 @@ public class InvitationsController : ControllerBase
     {
         await _mediator.Send(new DeleteInvitationCommand(id));
         return NoContent();
+    }
+
+    [HttpPost("{id:int}/access-link")]
+    [ProducesResponseType(typeof(InvitationAccessLinkResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GenerateAccessLink(int id)
+    {
+        var result = await _mediator.Send(new GenerateAccessLinkCommand(id));
+        var baseUrl = (_configuration["GuestLinks:BaseUrl"] ?? string.Empty).TrimEnd('/');
+        var url = $"{baseUrl}/guest/{result.Token}";
+        return Ok(new InvitationAccessLinkResponse(url));
     }
 }

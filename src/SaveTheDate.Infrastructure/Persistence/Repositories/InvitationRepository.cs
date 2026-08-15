@@ -14,6 +14,11 @@ public class InvitationRepository : IInvitationRepository
     public async Task<Invitation?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         => await _db.Invitations.FindAsync([id], cancellationToken);
 
+    public async Task<Invitation?> GetByAccessTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default)
+        => await _db.Invitations
+            .Include(i => i.Guest)
+            .FirstOrDefaultAsync(i => i.AccessTokenHash == tokenHash, cancellationToken);
+
     public async Task<IEnumerable<Invitation>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _db.Invitations.AsNoTracking().ToListAsync(cancellationToken);
 
